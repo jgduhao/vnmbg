@@ -1,0 +1,22 @@
+plugins {
+    id 'groovy'
+}
+
+group 'io.github.jgduhao'
+version '0.0.1-SNAPSHOT'
+
+repositories {
+    jcenter()
+    mavenCentral()
+}
+
+dependencies {
+    compile "io.vertx:vertx-core:3.8.0"
+    compile "io.vertx:vertx-lang-groovy:3.8.0"
+    compile "io.vertx:vertx-web:3.8.0"
+    compile 'io.vertx:vertx-mongo-client:3.8.0'
+    compile 'org.codehaus.groovy:groovy-all:2.5.7'
+    compile 'org.codehaus.groovy:groovy-dateutil:2.5.7'
+    testCompile 'io.vertx:vertx-unit:3.8.0'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
