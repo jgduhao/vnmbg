@@ -1,5 +1,6 @@
 package service;
 
+import consts.Mongo;
 import entity.Poster;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -20,7 +21,7 @@ public class VnmbPosterService {
     private static final Logger logger = LoggerFactory.getLogger(VnmbPosterService.class);
 
     private final MongoClient mongo;
-    private static final String collection = "poster";
+    private static final String collection = Mongo.POSTER_COLLECTION;
 
     public VnmbPosterService(Vertx vertx, JsonObject config){
         this.mongo = MongoClient.createShared(vertx,config);
@@ -41,7 +42,7 @@ public class VnmbPosterService {
             ValidUtil.validEmpty(Poster.Fields.posterSign,posterSign);
             JsonObject query = new JsonObject().put(Poster.Fields.posterSign,posterSign)
                                                .put(Poster.Fields.expiredTime,new JsonObject()
-                                                       .put("$gt", DateUtil.getDateTime()));
+                                                       .put(Mongo.GREATER_THAN, DateUtil.getDateTime()));
             logger.info("queryOne:"+query);
             mongo.findOne(collection, query,null, res ->{
                 if(res.succeeded()){
@@ -82,7 +83,7 @@ public class VnmbPosterService {
             ValidUtil.validEmpty(Poster.Fields.posterSign,posterSign);
             ValidUtil.validEmpty(Poster.Fields.available,available);
             JsonObject query = new JsonObject().put(Poster.Fields.posterSign,posterSign);
-            JsonObject update = new JsonObject().put("$set",new JsonObject().put(Poster.Fields.available,available));
+            JsonObject update = new JsonObject().put(Mongo.SET,new JsonObject().put(Poster.Fields.available,available));
             UpdateOptions options = new UpdateOptions();
             options.setReturningNewDocument(true);
             logger.info("update: "+query+" by: "+update);

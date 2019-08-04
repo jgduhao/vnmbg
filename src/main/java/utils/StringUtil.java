@@ -22,4 +22,9 @@ public class StringUtil {
         return builder.toString();
     }
 
+    public static String leftPaddingZeroToEight(Integer num){
+        return String.format("%08d",num);
+    }
+
+
 }

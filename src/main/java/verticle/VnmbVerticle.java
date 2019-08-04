@@ -54,10 +54,10 @@ public class VnmbVerticle extends AbstractVerticle {
                 .allowedMethods(allowMethods))
                 .handler(BodyHandler.create());
 
-        router.get(API.QUERY_BOARDS).handler(this::queryAllBoards);
-        router.post(API.ADD_BOARDS).handler(this::addBoard);
-        router.patch(API.UPDATE_BOARDS).handler(this::updateBoard);
-        router.delete(API.DELETE_BOARDS).handler(this::deleteBoard);
+        router.get(API.API_QUERY_BOARDS).handler(this::queryAllBoards);
+        router.post(API.API_ADD_BOARDS).handler(this::addBoard);
+        router.patch(API.API_UPDATE_BOARDS).handler(this::updateBoard);
+        router.delete(API.API_DELETE_BOARDS).handler(this::deleteBoard);
 
         vertx.createHttpServer().requestHandler(router).listen(port);
 

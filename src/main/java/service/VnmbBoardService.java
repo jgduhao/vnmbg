@@ -1,6 +1,7 @@
 package service;
 
 import consts.Error;
+import consts.Mongo;
 import entity.Board;
 import exceptions.VnmbRuntimeException;
 import io.vertx.core.Future;
@@ -22,7 +23,7 @@ public class VnmbBoardService {
     private static final Logger logger = LoggerFactory.getLogger(VnmbBoardService.class);
 
     private final MongoClient mongo;
-    private static final String collection = "board";
+    private static final String collection = Mongo.BOARD_COLLECTION;
 
     public VnmbBoardService(Vertx vertx, JsonObject config){
         this.mongo = MongoClient.createShared(vertx,config);
@@ -31,12 +32,12 @@ public class VnmbBoardService {
     public Future<List<Board>> getAll(Boolean available){
         return Future.future(promise -> {
             JsonObject query = new JsonObject();
-            query.put(Board.Fields.available,available == null ? true : available);
+            query.put(Board.Fields.available,ValidUtil.getValueOrDefault(available,true));
             logger.info("query:"+query);
             FindOptions options = new FindOptions();
             options.setFields(new JsonObject().put(Board.Fields.name, true)
                                               .put(Board.Fields.boardSign, true));
-            options.setSort(new JsonObject().put(Board.Fields.order, 1));
+            options.setSort(new JsonObject().put(Board.Fields.order, Mongo.ASC));
             mongo.findWithOptions(collection,query,options,res -> {
                 if(res.succeeded()){
                     List<Board> boards = new ArrayList<>();
@@ -99,11 +100,11 @@ public class VnmbBoardService {
         return Future.future(promise -> {
             ValidUtil.validEmpty(Board.Fields.boardSign,boardSign);
             if(board.getBoardSign() != null && !boardSign.equals(board.getBoardSign())){
-                throw new VnmbRuntimeException(Error.CannotChangeBoardSign);
+                throw new VnmbRuntimeException(Error.CannotChange,Board.Fields.boardSign);
             }
             JsonObject query = new JsonObject().put(Board.Fields.boardSign,boardSign);
             JsonObject update = new JsonObject()
-                    .put("$set", board.toJsonObject()
+                    .put(Mongo.SET, board.toJsonObject()
                                       .put(Board.Fields.updateTime,DateUtil.getDateTime()));
             UpdateOptions options = new UpdateOptions();
             options.setReturningNewDocument(true);
