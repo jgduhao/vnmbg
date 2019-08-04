@@ -135,7 +135,7 @@ public class VnmbPostService {
         }));
     }
 
-    public Future<List<Post>> postPageQuery(String boardSign,Integer pageSize,String lastPostId,Integer sort,Boolean available){
+    public Future<List<Post>> postPageQuery(String boardSign,Integer pageSize,String lastPostUpdTime,Integer sort,Boolean available){
         return Future.future(promise -> {
             ValidUtil.validEmpty(Post.Fields.boardSign,boardSign);
             ValidUtil.validEmpty(API.FIELD_PAGE_SIZE,pageSize);
@@ -143,12 +143,12 @@ public class VnmbPostService {
                     .put(Post.Fields.boardSign,boardSign)
                     .put(Post.Fields.replyPostNo,"")
                     .put(Post.Fields.available,ValidUtil.getValueOrDefault(available,true));
-            int pageSort = ValidUtil.getValueOrDefault(sort,Mongo.ASC);
-            if(lastPostId != null && !lastPostId.equals("")){
+            int pageSort = ValidUtil.getValueOrDefault(sort,Mongo.DESC);
+            if(lastPostUpdTime != null && !lastPostUpdTime.equals("")){
                 if(pageSort == Mongo.ASC){
-                    query.put(Mongo.GREATER_THAN, new JsonObject().put(Mongo.ID,lastPostId));
+                    query.put(Post.Fields.updateTime, new JsonObject().put(Mongo.GREATER_THAN,lastPostUpdTime));
                 } else {
-                    query.put(Mongo.LITTER_THAN, new JsonObject().put(Mongo.ID,lastPostId));
+                    query.put(Post.Fields.updateTime, new JsonObject().put(Mongo.LITTER_THAN,lastPostUpdTime));
                 }
             }
             FindOptions options = new FindOptions();
@@ -183,9 +183,9 @@ public class VnmbPostService {
             int pageSort = ValidUtil.getValueOrDefault(sort,Mongo.ASC);
             if(lastPostNo != null && !lastPostNo.equals("")){
                 if(pageSort == Mongo.ASC){
-                    query.put(Mongo.GREATER_THAN, new JsonObject().put(Post.Fields.postNo,lastPostNo));
+                    query.put(Post.Fields.postNo, new JsonObject().put(Mongo.GREATER_THAN,lastPostNo));
                 } else {
-                    query.put(Mongo.LITTER_THAN, new JsonObject().put(Post.Fields.postNo,lastPostNo));
+                    query.put(Post.Fields.postNo, new JsonObject().put(Mongo.LITTER_THAN,lastPostNo));
                 }
             }
             FindOptions options = new FindOptions();

@@ -39,7 +39,6 @@ public class VnmbPosterService {
 
     public Future<Poster> getOne(String posterSign){
         return Future.future(promise -> {
-            ValidUtil.validEmpty(Poster.Fields.posterSign,posterSign);
             JsonObject query = new JsonObject().put(Poster.Fields.posterSign,posterSign)
                                                .put(Poster.Fields.expiredTime,new JsonObject()
                                                        .put(Mongo.GREATER_THAN, DateUtil.getDateTime()));
