@@ -26,6 +26,16 @@ public class VnmbPosterService {
         this.mongo = MongoClient.createShared(vertx,config);
     }
 
+    public Future<Poster> getOrCreateOne(String posterSign){
+        return getOne(posterSign).compose(poster -> {
+            if(poster == null){
+                return addOne();
+            } else {
+                return Future.succeededFuture(poster);
+            }
+        });
+    }
+
     public Future<Poster> getOne(String posterSign){
         return Future.future(promise -> {
             ValidUtil.validEmpty(Poster.Fields.posterSign,posterSign);

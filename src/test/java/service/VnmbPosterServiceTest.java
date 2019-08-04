@@ -59,4 +59,38 @@ public class VnmbPosterServiceTest {
         }));
         async.awaitSuccess(5000);
     }
+
+    @Test
+    public void testGetOrCreateWhenGet(TestContext context){
+        Async async = context.async();
+        vnmbPosterService.addOne().setHandler(context.asyncAssertSuccess(addPoster -> {
+            String posterSign = addPoster.getPosterSign();
+            vnmbPosterService.getOrCreateOne(posterSign).setHandler(context.asyncAssertSuccess(getPoster -> {
+                context.assertNotNull(getPoster,"get Poster is null");
+                context.assertEquals(posterSign,getPoster.getPosterSign(),"get PosterSign error");
+                vnmbPosterService.deleteOne(posterSign).setHandler(context.asyncAssertSuccess(delRes -> {
+                    async.complete();
+                }));
+            }));
+        }));
+        async.awaitSuccess(5000);
+    }
+
+    @Test
+    public void testGetOrCreateWhenCreate(TestContext context){
+        Async async = context.async();
+        vnmbPosterService.getOrCreateOne("00000000").setHandler(context.asyncAssertSuccess(newPoster -> {
+            context.assertNotNull(newPoster,"poster is null after create");
+            String posterSign = newPoster.getPosterSign();
+            vnmbPosterService.getOne(posterSign).setHandler(context.asyncAssertSuccess(getPoster -> {
+                context.assertNotNull(getPoster,"poster is null after get");
+                context.assertEquals(posterSign,getPoster.getPosterSign(),"get poster is error");
+                vnmbPosterService.deleteOne(posterSign).setHandler(context.asyncAssertSuccess(delRes -> {
+                    async.complete();
+                }));
+            }));
+        }));
+        async.awaitSuccess(5000);
+    }
+
 }
