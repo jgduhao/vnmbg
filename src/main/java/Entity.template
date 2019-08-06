@@ -1,0 +1,54 @@
+package ${packageName};
+
+import io.vertx.core.json.JsonObject;
+<% imports.each { imp -> %>
+import ${imp};
+<% } %>
+
+public class ${className} {
+
+    <% fields.each { field -> %>
+    private ${field.value} ${field.key};
+    <% } %>
+
+    public ${className}() {}
+
+    public ${className}(JsonObject object){
+        <% fields.each { field -> %>
+        this.${field.key} = object.get${field.value}(Fields.${field.key});
+        <% } %>
+    }
+
+    public JsonObject toJsonObject(){
+        JsonObject object = new JsonObject();
+        <% fields.each { field -> %>
+        if(this.${field.key} != null){
+            object.put(Fields.${field.key}, this.${field.key});
+        }
+        <% } %>
+        return object;
+    }
+
+    <% fields.each { field -> %>
+    public ${field.value} get<% out << field.key[0].toUpperCase()+field.key[1..field.key.length()-1] %>() {
+        return ${field.key};
+    }
+    <% } %>
+
+    <% fields.each { field -> %>
+    public void set<% out << field.key[0].toUpperCase()+field.key[1..field.key.length()-1] %>(${field.value} ${field.key}) {
+        this.${field.key} = ${field.key};
+    }
+    <% } %>
+
+    @Override
+    public String toString() {
+        return "${className}:" + toJsonObject().encode();
+    }
+
+    public static class Fields{
+        <% fields.each { field -> %>
+        public static final String ${field.key} = "${field.key}";
+        <% } %>
+    }
+}

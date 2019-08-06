@@ -1,7 +1,7 @@
 {
   "packageName" : "io.github.jgduhao.entity",
   "className" : "Board",
-  "imports" : ["io.vertx.core.json.JsonObject"],
+  "imports" : [],
   "fields" : {"name" : "String",
               "boardSign" : "String",
               "order" : "String",
