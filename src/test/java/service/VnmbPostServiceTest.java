@@ -1,6 +1,7 @@
 package service;
 
 import consts.Mongo;
+import entity.Post;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
@@ -75,17 +76,41 @@ public class VnmbPostServiceTest {
         postService.addPost("comp1","WIW80OM","这是一个测试2，如果这个是测试，我希望能通过")
                 .setHandler(context.asyncAssertSuccess(mainPost -> {
                     context.assertNotNull(mainPost,"post is null after addPost");
-                    postService.addPostReply("comp1",mainPost.getPostNo(),"WIW80OM","我回复我自己")
+                    postService.addPostReply(mainPost,"WIW80OM","我回复我自己")
                             .setHandler(context.asyncAssertSuccess(reply -> {
                                 context.assertNotNull(reply,"reply is null after reply");
                                 context.assertEquals(mainPost.getPostNo(),reply.getReplyPostNo(),"reply error");
-                                postService.addPostReply("comp1",mainPost.getPostNo(),"WIW80OM","我回复我自己2")
+                                postService.addPostReply(mainPost,"WIW80OM","我回复我自己2")
                                         .setHandler(context.asyncAssertSuccess(reply2 -> {
                                             context.assertNotNull(reply2,"reply is null after reply");
                                             context.assertEquals(mainPost.getPostNo(),reply2.getReplyPostNo(),"reply error");
                                         }));
                                 async.complete();
                             }));
+                }));
+        async.awaitSuccess(5000);
+    }
+
+    @Test
+    public void addSagePostReply(TestContext context){
+        Async async = context.async();
+        postService.addPost("comp1","WIW80OM","这是一个测试，这个post将要被sage")
+                .setHandler(context.asyncAssertSuccess(mainPost -> {
+                    context.assertNotNull(mainPost,"post is null after addPost");
+                    Post updatePost = new Post();
+                    updatePost.setSage(true);
+                    postService.updateOne(mainPost.getPostNo(),updatePost).setHandler(context.asyncAssertSuccess(newMainPost -> {
+                        context.assertNotNull(newMainPost,"post is null after updateOne");
+                        postService.addPostReply(newMainPost,"WIW80OM","回复后updatetime应该不变")
+                                .setHandler(context.asyncAssertSuccess(replyPost -> {
+                                    context.assertNotNull(replyPost,"replypost is null after reply");
+                                    postService.getOne(replyPost.getReplyPostNo())
+                                            .setHandler(context.asyncAssertSuccess(latestMainPost -> {
+                                                context.assertEquals(latestMainPost.getUpdateTime(),mainPost.getUpdateTime(),"updatetime changed");
+                                                async.complete();
+                                            }));
+                                }));
+                    }));
                 }));
         async.awaitSuccess(5000);
     }

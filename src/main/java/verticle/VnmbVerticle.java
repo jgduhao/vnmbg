@@ -133,7 +133,7 @@ public class VnmbVerticle extends AbstractVerticle {
                     return Future.failedFuture(new VnmbRuntimeException(Error.noPost));
                 } else {
                     String newPosterSign = ctx.getCookie(API.POSTER_COOKIE_NAME).getValue();
-                    return postService.addPostReply(post.getBoardSign(),postNo,newPosterSign,content);
+                    return postService.addPostReply(post,newPosterSign,content);
                 }
             }).setHandler(res -> {
                 if(res.succeeded()){

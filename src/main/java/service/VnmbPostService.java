@@ -103,21 +103,25 @@ public class VnmbPostService {
         }));
     }
 
-    public Future<Post> addPostReply(String boardSign,String replyPostNo,String posterSign,String content){
-        ValidUtil.validEmpty(Post.Fields.boardSign,boardSign);
-        ValidUtil.validEmpty(Post.Fields.replyPostNo,replyPostNo);
+    public Future<Post> addPostReply(Post toReplyPost,String posterSign,String content){
+        ValidUtil.validEmpty(Post.Fields.boardSign,toReplyPost.getBoardSign());
+        ValidUtil.validEmpty(Post.Fields.replyPostNo,toReplyPost.getPostNo());
         ValidUtil.validEmpty(Post.Fields.posterSign,posterSign);
         ValidUtil.validEmpty(Post.Fields.content,content);
-        Post mainPost = new Post();
-        mainPost.setUpdateTime(DateUtil.getDateTimeSSS());
-        return updateOne(replyPostNo,mainPost)
+        Post updatePost = new Post();
+        if(toReplyPost.getSage()){
+            updatePost.setUpdateTime(toReplyPost.getUpdateTime());
+        } else {
+            updatePost.setUpdateTime(DateUtil.getDateTimeSSS());
+        }
+        return updateOne(toReplyPost.getPostNo(),updatePost)
                 .compose(mPost -> getSeq())
                 .compose(seq -> Future.future(promise -> {
             Post replyPost = new Post();
             replyPost.setPostNo(seq);
-            replyPost.setBoardSign(boardSign);
+            replyPost.setBoardSign(toReplyPost.getBoardSign());
             replyPost.setPosterSign(posterSign);
-            replyPost.setReplyPostNo(replyPostNo);
+            replyPost.setReplyPostNo(toReplyPost.getPostNo());
             replyPost.setContent(content);
             replyPost.setAvailable(true);
             replyPost.setSage(false);
@@ -218,6 +222,7 @@ public class VnmbPostService {
             JsonObject update = new JsonObject().put(Mongo.SET, post.toJsonObject());
             UpdateOptions options = new UpdateOptions();
             options.setReturningNewDocument(true);
+            logger.info("update:"+query+"set:"+update);
             mongo.findOneAndUpdateWithOptions(collection,query,update,new FindOptions(),options,res -> {
                 if(res.succeeded()){
                     promise.tryComplete(new Post(res.result()));
